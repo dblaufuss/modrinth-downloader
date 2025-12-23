@@ -1,2 +1,2 @@
 # modrinth-downloader
-python script to download mods from modrinth
+python script to download mods from modrinth collection

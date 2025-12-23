@@ -3,12 +3,11 @@ import json
 from bs4 import BeautifulSoup
 
 # PARAMETERS
-collection_id = "j1vbZc9Y"
-game_version =  "1.21.11"
-loader_api = "fabric"
+with open("config.json", "r") as f:
+    config = json.load(f)
 
 
-collection_data = requests.get(f"https://modrinth.com/collection/{collection_id}")
+collection_data = requests.get(f"https://modrinth.com/collection/{config["collection_id"]}")
 soup = BeautifulSoup(collection_data.text, "html.parser")
 
 mod_ids = set()
@@ -30,10 +29,10 @@ for mod in mod_ids:
     version_json = json.loads(version_data.content)
 
     for version in version_json:
-        if loader_api not in version["loaders"]:
+        if config["loader_api"] not in version["loaders"]:
             continue
 
-        if game_version in version["game_versions"]:
+        if config["game_version"] in version["game_versions"]:
 
             print("version_name: " + version["name"])
             print("version_number: " + version["version_number"])
