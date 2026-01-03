@@ -19,7 +19,7 @@ COLLECTION=$(curl -s $MODRINTH_API/collection/$COLLECTION_ID)
 MOD_COUNT=$(jq -r '.projects | length' <<< $COLLECTION)
 
 for MOD_ID in $(jq -r '.projects | @sh' <<< $COLLECTION | tr -d "'")
-do  
+do
     MOD_NAME=$(curl -s $MODRINTH_API/project/$MOD_ID | jq -r '.name')
     MOD_VERSION=$(
         curl -s $MODRINTH_API/project/$MOD_ID/version | \
