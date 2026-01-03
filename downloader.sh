@@ -21,22 +21,23 @@ MOD_COUNT=$(jq -r '.projects | length' <<< $COLLECTION)
 for MOD_ID in $(jq -r '.projects | @sh' <<< $COLLECTION | tr -d "'")
 do  
     MOD_NAME=$(curl -s $MODRINTH_API/project/$MOD_ID | jq -r '.name')
-    PROJECT=$(curl -s $MODRINTH_API/project/$MOD_ID/version)
-    MOD_VERSION=$(jq -r --arg VERSION $VERSION --arg LOADER $LOADER \
-        '[.[] | select(.game_versions.[]==$VERSION and .loaders.[]==$LOADER)] | .[0]' <<< $PROJECT
+    MOD_VERSION=$(
+        curl -s $MODRINTH_API/project/$MOD_ID/version | \
+        jq -r --arg VERSION $VERSION --arg LOADER $LOADER \
+        '[.[] | select(.game_versions.[]==$VERSION and .loaders.[]==$LOADER)].[0]'
     )
     URL=$(jq -r '.files.[0].url' <<< $MOD_VERSION)
 
     if [ $URL == null ]
     then
-        echo "WARNING: No valid version found for mod $MOD_NAME"
+        printf "\nWARNING: No valid version found for mod $MOD_NAME\n"
     else
-        wget -q -P mods/ $URL
         VERSION_NUMBER=$(jq -r '.version_number' <<< $MOD_VERSION)
         DATE_PUBLISHED=$(jq -r '.date_published[:10]' <<< $MOD_VERSION)
-        printf "Name: $MOD_NAME\nVersion Number: $VERSION_NUMBER\nDate Published: $DATE_PUBLISHED\n\n"
+        printf "\nName: $MOD_NAME\nVersion Number: $VERSION_NUMBER\nDate Published: $DATE_PUBLISHED\n"
+        wget -q --show-progress -P mods/ $URL
         ((DOWNLOAD_COUNT++))
     fi
 done
 
-echo "FINISHED: Downloaded [$DOWNLOAD_COUNT/$MOD_COUNT] mods"
+printf "\nFINISHED: Downloaded [$DOWNLOAD_COUNT/$MOD_COUNT] mods"
